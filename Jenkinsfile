@@ -13,19 +13,32 @@ pipeline {
             }
         }
 
-        stage('install') {
+        // stage('install') {
+        //     steps {
+        //        sh "npm install"
+        //     }
+        // }
+
+        // stage('owasp_check') {
+        //     steps {
+        //         dependencyCheck additionalArguments: '--scan ./ --format HTML', odcInstallation: 'depesndency-check-9'
+        //         dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+        //     }
+        // }
+
+         stage('build') {
             steps {
-               sh "npm install"
+
+                script {
+                    withDockerRegistry(credentialsId: 'ilzam-docker', toolName: 'docker') {
+                        sh "docker build -t node-jenkins ."
+                        sh "docker tag node-jenkins ilzam/node-jenkins:latest"
+                        sh "docker push ilzam/node-jenkins:latest"
+                    }
+                }
+
             }
         }
-
-        stage('owasp_check') {
-            steps {
-                dependencyCheck additionalArguments: '--scan ./ --format HTML', odcInstallation: 'dependency-check-9'
-                dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-            }
-        }
-
         
 
     }
